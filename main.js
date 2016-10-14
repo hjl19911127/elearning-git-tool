@@ -18,10 +18,13 @@ function createWindow() {
     mainWindow.loadURL(`file://${__dirname}/index.html`)
 
     // Open the DevTools.
-    //mainWindow.webContents.openDevTools()
+    mainWindow.webContents.openDevTools()
 
-    ipc.on('pppp',function(){
-        mainWindow.webContents.send('ping','aaaa')
+    ipc.on('pppp', function () {
+        shell.exec('git remote -v', function (code, stdout, stderr) {
+            mainWindow.webContents.send('ping', stdout)
+        })
+
     });
 
     // Emitted when the window is closed.
