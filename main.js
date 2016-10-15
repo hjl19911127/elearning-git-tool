@@ -1,5 +1,7 @@
 const electron = require('electron')
 const shell = require('shelljs')
+const path = require('path');
+const fs = require('fs');
 // Module to control application life.
 const app = electron.app
 // Module to create native browser window.
@@ -13,26 +15,41 @@ let mainWindow
 function createWindow() {
     // Create the browser window.
     mainWindow = new BrowserWindow({width: 800, height: 600})
-
     // and load the index.html of the app.
     mainWindow.loadURL(`file://${__dirname}/index.html`)
-
     // Open the DevTools.
     mainWindow.webContents.openDevTools()
-
-    ipc.on('pppp', function () {
-        shell.exec('git remote -v', function (code, stdout, stderr) {
-            mainWindow.webContents.send('ping', stdout)
-        })
-
-    });
-
     // Emitted when the window is closed.
     mainWindow.on('closed', function () {
         // Dereference the window object, usually you would store windows
         // in an array if your app supports multi windows, this is the time
         // when you should delete the corresponding element.
         mainWindow = null
+    })
+    bindEvents();
+}
+
+function bindEvents() {
+    ipc.on('SAVECONFIG', function (event, data) {
+        saveConfig(JSON.stringify(data));
+    });
+    ipc.on('pppp', function () {
+        shell.exec('git remote -v', {silent: true}, function (code, stdout, stderr) {
+            mainWindow.webContents.send('ping', stdout)
+        })
+    });
+}
+
+function saveConfig(config) {
+    var _path = path.join(__dirname, 'config.json');
+    //var path1 = "d:\\ProjectsSpace\\ElectronProjects\\ElectronTest2\\app\\html\\config\\record.txt";
+    console.log(config);//测试路径对不对的
+    //console.log(_path, path1);//测试路径对不对的
+    //fs.readFile(_path, 'utf8', function (err, data) {
+    //    if (err) return console.log(err);
+    //});
+    fs.writeFile(_path, config, function (err) {
+        if (!err)console.log("Success")
     })
 }
 
