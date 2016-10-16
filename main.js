@@ -7,14 +7,14 @@ const app = electron.app
 // Module to create native browser window.
 const BrowserWindow = electron.BrowserWindow
 
-const ipc = require('electron').ipcMain;
+const ipc = electron.ipcMain;
 // Keep a global reference of the window object, if you don't, the window will
 // be closed automatically when the JavaScript object is garbage collected.
 let mainWindow
 
 function createWindow() {
     // Create the browser window.
-    mainWindow = new BrowserWindow({width: 800, height: 600})
+    mainWindow = new BrowserWindow({ width: 800, height: 600 })
     // and load the index.html of the app.
     mainWindow.loadURL(`file://${__dirname}/index.html`)
     // Open the DevTools.
@@ -26,6 +26,10 @@ function createWindow() {
         // when you should delete the corresponding element.
         mainWindow = null
     })
+    mainWindow.webContents.on('did-finish-load', () => {
+        let config = getConfig();
+        mainWindow.webContents.send('render', { config: config });
+    });
     bindEvents();
 }
 
@@ -34,9 +38,17 @@ function bindEvents() {
         saveConfig(JSON.stringify(data));
     });
     ipc.on('pppp', function () {
-        shell.exec('git remote -v', {silent: true}, function (code, stdout, stderr) {
+        shell.exec('git remote -v', { silent: true }, function (code, stdout, stderr) {
             mainWindow.webContents.send('ping', stdout)
         })
+    });
+}
+
+function getConfig() {
+    var _path = path.join(__dirname, 'config.json');
+    fs.readFile(_path, 'utf8', function (err, data) {
+        console.log(data);
+        if (err) return console.log(err);
     });
 }
 
@@ -49,7 +61,7 @@ function saveConfig(config) {
     //    if (err) return console.log(err);
     //});
     fs.writeFile(_path, config, function (err) {
-        if (!err)console.log("Success")
+        if (!err) console.log("Success")
     })
 }
 

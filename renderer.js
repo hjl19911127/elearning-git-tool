@@ -4,7 +4,7 @@
 const ipc = require('electron').ipcRenderer;
 const {dialog} = require('electron').remote;
 
-ipc.on('ping', function (e, m) {
+ipc.on('render', function (e, m) {
     console.log(e);
     console.log(m);
 })
