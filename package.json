@@ -1,25 +1,26 @@
 {
-    "name": "electron-quick-start",
-    "version": "1.0.0",
-    "description": "A minimal Electron application",
-    "main": "main.js",
-    "scripts": {
-        "start": "electron ."
-    },
-    "repository": "https://github.com/electron/electron-quick-start",
-    "keywords": [
-        "Electron",
-        "quick",
-        "start",
-        "tutorial",
-        "demo"
-    ],
-    "author": "GitHub",
-    "license": "CC0-1.0",
-    "dependencies": {
-        "shelljs": "^0.7.4"
-    },
-    "devDependencies": {
-        "electron": "^1.4.1"
-    }
+  "name": "elearning-git-tool",
+  "version": "1.0.0",
+  "description": "elearning git tool",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "package": "electron-packager ./ elearning-git-tool --platform=win32 --arch=x64 --out=dist --ignore=\\.gitignore --overwrite "
+  },
+  "repository": "https://github.com/hjl19911127/elearning-git-tool",
+  "keywords": [
+    "Electron",
+    "elearning",
+    "git",
+    "tool"
+  ],
+  "author": "hjl4347570@163.com",
+  "license": "MIT",
+  "dependencies": {
+    "shelljs": "^0.7.4"
+  },
+  "devDependencies": {
+    "electron-packager": "^8.1.0",
+    "electron-prebuilt": "^1.4.3"
+  }
 }
