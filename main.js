@@ -2,6 +2,7 @@ const electron = require('electron')
 const shell = require('shelljs')
 const path = require('path');
 const fs = require('fs');
+const NodeGit = require("nodegit");
 // Module to control application life.
 const app = electron.app
 // Module to create native browser window.
@@ -12,7 +13,15 @@ const ipc = electron.ipcMain;
 // be closed automatically when the JavaScript object is garbage collected.
 let mainWindow
 
+function gitOperate() {
+    var pathToRepo = require("path").resolve("E:/mine/codehuang");
+    NodeGit.Repository.open(pathToRepo).then(function (repo) {
+        console.log(repo);
+        // Inside of this function we have an open repo
+    });
+}
 function createWindow() {
+    gitOperate();
     // Create the browser window.
     mainWindow = new BrowserWindow({ width: 800, height: 600 })
     // and load the index.html of the app.
@@ -27,8 +36,15 @@ function createWindow() {
         mainWindow = null
     })
     mainWindow.webContents.on('did-finish-load', () => {
-        let config = getConfig();
-        mainWindow.webContents.send('render', { config: config });
+        var _path = path.join(__dirname, 'config.json');
+        fs.readFile(_path, 'utf8', function (err, data) {
+            console.log(data);
+            if (err) {
+                return console.log(err)
+            } else {
+                mainWindow.webContents.send('render', { config: config });
+            }
+        });
     });
     bindEvents();
 }
@@ -41,14 +57,6 @@ function bindEvents() {
         shell.exec('git remote -v', { silent: true }, function (code, stdout, stderr) {
             mainWindow.webContents.send('ping', stdout)
         })
-    });
-}
-
-function getConfig() {
-    var _path = path.join(__dirname, 'config.json');
-    fs.readFile(_path, 'utf8', function (err, data) {
-        console.log(data);
-        if (err) return console.log(err);
     });
 }
 
