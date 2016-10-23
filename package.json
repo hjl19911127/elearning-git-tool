@@ -17,10 +17,10 @@
   "author": "hjl4347570@163.com",
   "license": "MIT",
   "dependencies": {
-    "shelljs": "^0.7.4"
+    "simple-git": "^1.55.0"
   },
   "devDependencies": {
-    "electron-packager": "^8.1.0",
-    "electron-prebuilt": "^1.4.3"
+    "electron": "^1.4.4",
+    "electron-packager": "^8.1.0"
   }
 }

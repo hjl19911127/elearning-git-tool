@@ -1,8 +1,7 @@
 const electron = require('electron')
-const shell = require('shelljs')
 const path = require('path');
 const fs = require('fs');
-const NodeGit = require("nodegit");
+const simpleGit = require('simple-git')();
 // Module to control application life.
 const app = electron.app
 // Module to create native browser window.
@@ -14,10 +13,15 @@ const ipc = electron.ipcMain;
 let mainWindow
 
 function gitOperate() {
-    var pathToRepo = require("path").resolve("E:/mine/codehuang");
-    NodeGit.Repository.open(pathToRepo).then(function (repo) {
-        console.log(repo);
-        // Inside of this function we have an open repo
+    simpleGit.then(function () {
+        console.log('Starting pull...');
+    }).pull(function (err, update) {
+        console.log(update);
+        if (update && update.summary.changes) {
+            // require('child_process').exec('npm restart');
+        }
+    }).then(function () {
+        console.log('pull done.');
     });
 }
 function createWindow() {
@@ -54,9 +58,9 @@ function bindEvents() {
         saveConfig(JSON.stringify(data));
     });
     ipc.on('pppp', function () {
-        shell.exec('git remote -v', { silent: true }, function (code, stdout, stderr) {
-            mainWindow.webContents.send('ping', stdout)
-        })
+        // shell.exec('git remote -v', { silent: true }, function (code, stdout, stderr) {
+        //     mainWindow.webContents.send('ping', stdout)
+        // })
     });
 }
 
