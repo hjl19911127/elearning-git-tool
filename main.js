@@ -1,7 +1,7 @@
 const electron = require('electron')
 const path = require('path');
 const fs = require('fs');
-const simpleGit = require('simple-git')();
+const simpleGit = require('simple-git');
 // Module to control application life.
 const app = electron.app
 // Module to create native browser window.
@@ -13,7 +13,7 @@ const ipc = electron.ipcMain;
 let mainWindow
 
 function gitOperate() {
-    simpleGit.then(function () {
+    simpleGit().then(function () {
         console.log('Starting pull...');
     }).pull(function (err, update) {
         console.log(update);
