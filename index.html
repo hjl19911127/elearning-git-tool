@@ -1,24 +1,50 @@
 <!DOCTYPE html>
 <html>
+
 <head>
-    <meta charset="UTF-8">
-    <title>Elearning GIT</title>
+	<meta charset="UTF-8">
+	<title>Elearning GIT</title>
+	<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+	<link rel="stylesheet" href="./app/addins/normalize/normalize.css">
+	<link rel="stylesheet" href="./app/addins/bootstrap/bootstrap.css">
+	<!--<link rel="stylesheet" href="./app/addins/bootstrap/bootstrap-theme.css">-->
 </head>
+
 <body>
-<div class="version">
-    <label>新版本: <input type="text"></label>
-</div>
-<div class="control-panel">
-    <fieldset>
-        <legend>测评组件</legend>
-        <label>本地路径: <input type="text" id="exam_path"></label>
-        <button type="button" id="exam_button">选择目录</button>
-    </fieldset>
-</div>
+	<div id="app" class="container-fluid">
+		<form class="form-inline">
+			<div class="form-group">
+				<label for="exampleInputName2">标签:</label>
+				<input type="text" class="form-control" placeholder="新建一个GIT目录">
+			</div>
+			<button type="button" class="btn btn-default" @click="">Send invitation</button>
+
+			<div class="version">
+				<label>标签: <input type="text"></label>
+				<button type="button" class="btn btn-primary btn-sm">添加</button>
+				<button type="button" class="btn btn-secondary btn-sm">保存</button>
+			</div>
+			<div class="control-panel">
+				<fieldset>
+					<legend>测评组件</legend>
+					<label>本地路径: <input type="text" id="exam_path"></label>
+					<button type="button" id="exam_button">选择目录</button>
+				</fieldset>
+			</div>
+		</form>
+	</div>
 </body>
+<!-- Insert this line above script imports  -->
+<script>if (typeof module === 'object') {window.module = module; module = undefined;}</script>
+<!-- normal script imports etc  -->
+<script src="./app/addins/jquery/jquery-3.1.1.js"></script>
+<script src="./app/addins/vue/vue.js"></script>
+<script src="./app/addins/bootstrap/bootstrap.js"></script>
+<!-- Insert this line after script imports -->
+<script>if (window.module) module = window.module;</script>
 
 <script>
-    // You can also require other files to run in this process
-    require('./renderer.js')
+    require('./app/page/renderer.js')
 </script>
+
 </html>

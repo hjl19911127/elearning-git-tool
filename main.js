@@ -27,7 +27,7 @@ function gitOperate() {
 function createWindow() {
     gitOperate();
     // Create the browser window.
-    mainWindow = new BrowserWindow({ width: 800, height: 600 })
+    mainWindow = new BrowserWindow({ width: 1000, height: 600 })
     // and load the index.html of the app.
     mainWindow.loadURL(`file://${__dirname}/index.html`)
     // Open the DevTools.
@@ -46,7 +46,7 @@ function createWindow() {
             if (err) {
                 return console.log(err)
             } else {
-                mainWindow.webContents.send('render', { config: config });
+                mainWindow.webContents.send('render', { config: data });
             }
         });
     });

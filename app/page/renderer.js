@@ -4,15 +4,25 @@
 const ipc = require('electron').ipcRenderer;
 const {dialog} = require('electron').remote;
 
+var app = new Vue({
+    el: '#app',
+    data: {
+        message: 'Hello Vue!'
+    },
+    methods() {
+
+    }
+})
+
 ipc.on('render', function (e, m) {
     console.log(e);
     console.log(m);
 })
 function selectFolder(id) {
-    dialog.showOpenDialog({properties: ['openFile', 'openDirectory']}, function (dirs) {
+    dialog.showOpenDialog({ properties: ['openFile', 'openDirectory'] }, function (dirs) {
         console.log(dirs);
         document.getElementById(id + '_path').value = dirs[0]
-        ipc.send('SAVECONFIG', {id: id, path: dirs[0]})
+        ipc.send('SAVECONFIG', { id: id, path: dirs[0] })
     })
 }
 document.addEventListener('click', function (event) {
