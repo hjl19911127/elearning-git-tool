@@ -1,7 +1,7 @@
 const electron = require('electron')
 const path = require('path');
 const fs = require('fs');
-const simpleGit = require('simple-git');
+
 // Module to control application life.
 const app = electron.app
 // Module to create native browser window.
@@ -12,20 +12,8 @@ const ipc = electron.ipcMain;
 // be closed automatically when the JavaScript object is garbage collected.
 let mainWindow
 
-function gitOperate() {
-    simpleGit().then(function () {
-        console.log('Starting pull...');
-    }).pull(function (err, update) {
-        console.log(update);
-        if (update && update.summary.changes) {
-            // require('child_process').exec('npm restart');
-        }
-    }).then(function () {
-        console.log('pull done.');
-    });
-}
 function createWindow() {
-    gitOperate();
+    bindEvents();
     // Create the browser window.
     mainWindow = new BrowserWindow({ width: 1000, height: 600 })
     // and load the index.html of the app.
@@ -46,34 +34,37 @@ function createWindow() {
             if (err) {
                 return console.log(err)
             } else {
-                mainWindow.webContents.send('render', { config: data });
+                mainWindow.webContents.send('render', data);
             }
         });
     });
-    bindEvents();
+
 }
 
 function bindEvents() {
-    ipc.on('SAVECONFIG', function (event, data) {
-        saveConfig(JSON.stringify(data));
-    });
-    ipc.on('pppp', function () {
-        // shell.exec('git remote -v', { silent: true }, function (code, stdout, stderr) {
-        //     mainWindow.webContents.send('ping', stdout)
-        // })
+    ipc.on('save-config', (event, data) => {
+        var _path = path.join(__dirname, 'config.json');
+        fs.exists(path.join(__dirname, 'config.json'), (exist) => {
+            if (exist) {
+                fs.readFile(_path, 'utf8', (err, readData) => {
+                    if (err) {
+                        console.log(err)
+                        mainWindow.webContents.send('error', err);
+                    } else {
+                        saveConfig(JSON.stringify(data));
+                    }
+                });
+            } else {
+                saveConfig(JSON.stringify(data));
+            }
+        })
     });
 }
 
 function saveConfig(config) {
     var _path = path.join(__dirname, 'config.json');
-    //var path1 = "d:\\ProjectsSpace\\ElectronProjects\\ElectronTest2\\app\\html\\config\\record.txt";
-    console.log(config);//测试路径对不对的
-    //console.log(_path, path1);//测试路径对不对的
-    //fs.readFile(_path, 'utf8', function (err, data) {
-    //    if (err) return console.log(err);
-    //});
     fs.writeFile(_path, config, function (err) {
-        if (!err) console.log("Success")
+        if (!err) mainWindow.webContents.send('success', 'Add Workspace success!');
     })
 }
 
