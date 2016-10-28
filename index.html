@@ -14,43 +14,45 @@
 	<div id="app" class="container-fluid">
 		<div class="panel panel-default">
 			<div class="panel-body">
-				<button type="button" class="btn btn-primary btn-lg" @click="addWorkspace" title="添加Git工作目录"><span class="glyphicon glyphicon-plus"></span>添加</button>
+				<button type="button" class="btn btn-primary btn-md" @click="addWorkspace" title="添加Git工作目录"><span class="glyphicon glyphicon-plus"></span> 添加Git工作目录</button>
 			</div>
 		</div>
 		<div class="panel panel-default">
 			<div class="panel-heading">工作目录</div>
 			<div class="panel-body">
-				<table class="table">
+				<table class="table table-striped table-condensed table-hover" style="table-layout: fixed;" v-if="workspaces.length">
 					<thead>
 						<tr>
-							<th>名称</th>
-							<th>目录</th>
-							<th>当前分支</th>
-							<th>需要合进develop的分支</th>
-							<th>新分支（基于develop）</th>
-							<th>操作</th>
+							<th style="width:15%">名称</th>
+							<th style="width:20%">目录</th>
+							<th style="width:15%">当前分支</th>
+							<th style="width:20%">需要合进develop的分支</th>
+							<th style="width:20%">新分支（基于develop）</th>
+							<th style="width:10%">操作</th>
 						</tr>
 					</thead>
 					<tbody>
 						<tr v-for="(item, index) in workspaces">
-							<td>{{item.title}}</td>
-							<td>{{item.path}}</td>
-							<td>{{item.nowBranch}}</td>
+							<td :title="item.title">{{item.title}}</td>
+							<td :title="item.path">{{item.path}}</td>
+							<td :title="item.nowBranch">{{item.nowBranch}}</td>
 							<td>
-								<select v-model="item.branchIntoDevelop">
-								<option v-for="branch in item.localBranches" :value="branch.name">
-									{{branch.name}}
-								</option>
+								<select class="form-control col-xs-12" v-model="item.branchIntoDevelop">
+									<option selected>无</option>
+									<option v-for="branch in item.AllBranches" :value="branch.name">
+										{{branch.name}}
+									</option>
 								</select>
 							</td>
-							<td><input type="text" placeholder="输入新分支" v-model="item.newBranch"></td>
+							<td><input type="text" class="form-control col-xs-12" placeholder="输入新分支" v-model.lazy.trim="item.newBranch"></td>
 							<td>
 								<button type="button" class="btn btn-primary btn-sm" @click="selectWorkspace(item)" title="更换目录"><span class="glyphicon glyphicon-pencil"></span></button>
-								<button type="button" class="btn btn-danger btn-sm" @click="deleteWorkspace(item)" title="删除"><span class="glyphicon glyphicon-minus"></span></button>
+								<button type="button" class="btn btn-danger btn-sm" @click="deleteWorkspace(index,item)" title="删除"><span class="glyphicon glyphicon-minus"></span></button>
 							</td>
 						</tr>
 					</tbody>
 				</table>
+				<div class="text-center" v-if="!workspaces.length">无</div>
 			</div>
 
 		</div>

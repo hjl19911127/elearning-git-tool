@@ -18,6 +18,9 @@ function createWindow() {
     mainWindow = new BrowserWindow({ width: 1000, height: 600 })
     // and load the index.html of the app.
     mainWindow.loadURL(`file://${__dirname}/index.html`)
+    // add DevTools Extension
+    let vuePath = 'C:\\Users\\Alexander\\AppData\\Local\\Google\\Chrome\\User Data\\Default\\Extensions\\nhdogjmejiglipccpnnnanhbledajbpd\\2.1.2_1';
+    BrowserWindow.addDevToolsExtension(vuePath);
     // Open the DevTools.
     mainWindow.webContents.openDevTools()
     // Emitted when the window is closed.

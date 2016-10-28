@@ -5,23 +5,10 @@ const ipc = require('electron').ipcRenderer;
 const {dialog} = require('electron').remote;
 const simpleGit = require('simple-git');
 
-function gitOperate(path) {
-    return simpleGit(path).then(function () {
-        console.log('Starting fetch...');
-    }).fetch(function (err, summary) {
-        console.log(err);
-        console.log(summary);
-    }).then(function () {
-        console.log('fetch done.');
-    });
-}
-
-
 var app = new Vue({
     el: '#app',
     data() {
         return {
-            title: '',
             workspaces: [],
         }
     },
@@ -36,15 +23,27 @@ var app = new Vue({
         init() {
             this.bindEvents();
         },
+        getWorkspaceStatus(item) {
+            return new Promise((resolve, reject) => {
+                simpleGit(item.path).status((err, summary) => {
+                    item.newBranch = '';
+                    item.nowBranch = summary.current;
+                }).branch((err, summary) => {
+                    item.AllBranches = Object.keys(summary.branches).map((key) => {
+                        return summary.branches[key];
+                    })
+                    resolve(item);
+                });
+            });
+        },
         bindEvents() {
             ipc.on('render', (event, data) => {
                 console.log(data);
                 let config = JSON.parse(data);
                 if (config.workspaces) {
-                    config.workspaces.forEach((item) => {
-                        simpleGit(item.path).status((err, summary) => {
-                            item.nowBranch = summary.current;
-                            this.workspaces.push(item)
+                    config.workspaces.forEach((workspace) => {
+                        this.getWorkspaceStatus(workspace).then((res) => {
+                            this.workspaces.push(res);
                         });
                     })
                 }
@@ -58,36 +57,36 @@ var app = new Vue({
         },
         addWorkspace() {
             dialog.showOpenDialog({ properties: ['openFile', 'openDirectory'] }, (dirs) => {
-                console.log(dirs);
                 if (dirs) {
-                    simpleGit(dirs[0]).status((err, summary) => {
-                        this.workspaces.push({
-                            title: dirs[0].replace(/.+\\/gi, ''), path: dirs[0], nowBranch: summary.current
-                        })
+                    let workspace = { title: dirs[0].replace(/.+\\/gi, ''), path: dirs[0] };
+                    this.getWorkspaceStatus(workspace).then((res) => {
+                        this.workspaces.push(res);
                         ipc.send('save-config', { workspaces: this.workspacesForSave });
-                    }).then(function (data1, data2) {
-                        console.log(data1);
-                        console.log(data2);
-                    })
+                    });
                 }
             })
         },
-        selectWorkspace(item) {
+        selectWorkspace(workspace) {
             dialog.showOpenDialog({ properties: ['openFile', 'openDirectory'] }, (dirs) => {
-                console.log(dirs);
                 if (dirs) {
-                    item.path = dirs[0];
-                    item.title = dirs[0].replace(/.+\\/gi, '');
-                    simpleGit(dirs[0]).status(function (err, summary) {
-                        console.log(err);
-                        console.log(summary);
-                        item.nowBranch = summary.current;
+                    workspace.path = dirs[0];
+                    workspace.title = dirs[0].replace(/.+\\/gi, '');
+                    this.getWorkspaceStatus(workspace).then((res) => {
                         ipc.send('save-config', { workspaces: this.workspacesForSave });
-                    }).then(function (data1, data2) {
-                        console.log(data1);
-                        console.log(data2);
-                    })
+                    });
                 }
+            })
+        },
+        deleteWorkspace(index, item) {
+            const options = {
+                type: 'question',
+                title: '删除工作目录',
+                message: '是否要删除该工作目录 ' + item.title + ' ？',
+                detail: '此操作不会删除磁盘上的文件',
+                buttons: ['确定', '取消']
+            };
+            dialog.showMessageBox(options, (btnIndex, bb) => {
+                if (!btnIndex) this.workspaces.splice(index, 1);
             })
         }
     },
