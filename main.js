@@ -8,6 +8,8 @@ const app = electron.app;
 const BrowserWindow = electron.BrowserWindow;
 
 const ipc = electron.ipcMain;
+//config getter setter
+const globalConfig = require('./app/native/globalConfig');
 // Keep a global reference of the window object, if you don't, the window will
 // be closed automatically when the JavaScript object is garbage collected.
 let mainWindow;
@@ -16,7 +18,7 @@ function createWindow() {
     // add DevTools Extension
     addDevToolsExtension(BrowserWindow);
     // Create the browser window.
-    mainWindow = new BrowserWindow({ width: 1000, height: 600 })
+    mainWindow = new BrowserWindow({ width: 1200, height: 800 })
     // and load the index.html of the app.
     mainWindow.loadURL(`file://${__dirname}/index.html`)
     // Open the DevTools.
@@ -29,14 +31,10 @@ function createWindow() {
         mainWindow = null
     })
     mainWindow.webContents.on('did-finish-load', () => {
-        var _path = path.join(__dirname, 'config.json');
-        fs.readFile(_path, 'utf8', function (err, data) {
-            console.log(data);
-            if (err) {
-                return console.log(err)
-            } else {
-                mainWindow.webContents.send('render', data);
-            }
+        globalConfig.getConfig().then((data) => {
+            mainWindow.webContents.send('get-config', data);
+        }, (err) => {
+            mainWindow.webContents.send('sys-error', err);
         });
     });
     bindEvents();
@@ -58,30 +56,20 @@ function addDevToolsExtension(BrowserWindow) {
 }
 
 function bindEvents() {
-    ipc.on('save-config', (event, data) => {
-        var _path = path.join(__dirname, 'config.json');
-        fs.exists(path.join(__dirname, 'config.json'), (exist) => {
-            if (exist) {
-                fs.readFile(_path, 'utf8', (err, readData) => {
-                    if (err) {
-                        console.log(err)
-                        mainWindow.webContents.send('error', err);
-                    } else {
-                        saveConfig(JSON.stringify(data));
-                    }
-                });
-            } else {
-                saveConfig(JSON.stringify(data));
-            }
-        })
+    ipc.on('get-config', (event, data) => {
+        globalConfig.getConfig().then((data) => {
+            mainWindow.webContents.send('get-config', data);
+        }, (err) => {
+            mainWindow.webContents.send('sys-error', err);
+        });
     });
-}
-
-function saveConfig(config) {
-    var _path = path.join(__dirname, 'config.json');
-    fs.writeFile(_path, config, function (err) {
-        if (!err) mainWindow.webContents.send('success', 'Add Workspace success!');
-    })
+    ipc.on('set-config', (event, data) => {
+        globalConfig.setConfig(data).then((message) => {
+            mainWindow.webContents.send('sys-success', message);
+        }, (err) => {
+            mainWindow.webContents.send('sys-error', err);
+        });
+    });
 }
 
 // This method will be called when Electron has finished

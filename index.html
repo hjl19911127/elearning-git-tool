@@ -10,24 +10,25 @@
 	<!--<link rel="stylesheet" href="./app/addins/bootstrap/bootstrap-theme.css">-->
 </head>
 
-<body>
+<body style="font-size:12px;">
 	<div id="app" class="container-fluid">
-		<div class="panel panel-default">
+		<div class="panel panel-default" style="margin-top:10px;">
 			<div class="panel-body">
-				<button type="button" class="btn btn-primary btn-md" @click="addWorkspace" title="添加Git工作目录"><span class="glyphicon glyphicon-plus"></span> 添加Git工作目录</button>
+				<button type="button" class="btn btn-success btn-md" @click="addWorkspace" title="添加Git工作目录"><span class="glyphicon glyphicon-plus"></span> 添加Git工作目录</button>
+				<button type="button" class="btn btn-primary btn-md" @click="refresh" title="添加Git工作目录"><span class="glyphicon glyphicon-refresh"></span> 刷新</button>
 			</div>
 		</div>
 		<div class="panel panel-default">
 			<div class="panel-heading">工作目录</div>
-			<div class="panel-body">
+			<div class="panel-body" style="max-height:580px;overflow:auto;">
 				<table class="table table-striped table-condensed table-hover" style="table-layout: fixed;" v-if="workspaces.length">
 					<thead>
 						<tr>
-							<th style="width:15%">名称</th>
+							<th style="width:20%">名称</th>
 							<th style="width:20%">目录</th>
 							<th style="width:15%">当前分支</th>
 							<th style="width:20%">需要合进develop的分支</th>
-							<th style="width:20%">新分支（基于develop）</th>
+							<th style="width:15%">新分支（基于develop）</th>
 							<th style="width:10%">操作</th>
 						</tr>
 					</thead>
@@ -38,7 +39,7 @@
 							<td :title="item.nowBranch">{{item.nowBranch}}</td>
 							<td>
 								<select class="form-control col-xs-12" v-model="item.branchIntoDevelop">
-									<option selected>无</option>
+									<option value="">无</option>
 									<option v-for="branch in item.AllBranches" :value="branch.name">
 										{{branch.name}}
 									</option>
@@ -46,8 +47,8 @@
 							</td>
 							<td><input type="text" class="form-control col-xs-12" placeholder="输入新分支" v-model.lazy.trim="item.newBranch"></td>
 							<td>
-								<button type="button" class="btn btn-primary btn-sm" @click="selectWorkspace(item)" title="更换目录"><span class="glyphicon glyphicon-pencil"></span></button>
-								<button type="button" class="btn btn-danger btn-sm" @click="deleteWorkspace(index,item)" title="删除"><span class="glyphicon glyphicon-minus"></span></button>
+								<button type="button" class="btn btn-primary btn-xs" @click="selectWorkspace(item)" title="更换目录"><span class="glyphicon glyphicon-pencil"></span></button>
+								<button type="button" class="btn btn-danger btn-xs" @click="deleteWorkspace(index,item)" title="删除"><span class="glyphicon glyphicon-minus"></span></button>
 							</td>
 						</tr>
 					</tbody>

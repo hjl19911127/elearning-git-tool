@@ -23,11 +23,17 @@ var app = new Vue({
         init() {
             this.bindEvents();
         },
+        setConfig() {
+            ipc.send('set-config', { workspaces: this.workspacesForSave });
+        },
+        refresh() {
+            ipc.send('get-config', { workspaces: this.workspacesForSave });
+        },
         getWorkspaceStatus(item) {
             return new Promise((resolve, reject) => {
+                item.branchIntoDevelop = '';
                 simpleGit(item.path).status((err, summary) => {
-                    item.newBranch = '';
-                    item.nowBranch = summary.current;
+                    if (summary) item.nowBranch = summary.current;
                 }).branch((err, summary) => {
                     item.AllBranches = Object.keys(summary.branches).map((key) => {
                         return summary.branches[key];
@@ -37,21 +43,20 @@ var app = new Vue({
             });
         },
         bindEvents() {
-            ipc.on('render', (event, data) => {
-                console.log(data);
-                let config = JSON.parse(data);
+            ipc.on('get-config', (event, config) => {
                 if (config.workspaces) {
-                    config.workspaces.forEach((workspace) => {
-                        this.getWorkspaceStatus(workspace).then((res) => {
-                            this.workspaces.push(res);
-                        });
+                    let promises = config.workspaces.map((workspace) => {
+                        return this.getWorkspaceStatus(workspace);
+                    })
+                    Promise.all(promises).then((res) => {
+                        this.workspaces = res;
                     })
                 }
             });
-            ipc.on('success', (event, data) => {
+            ipc.on('sys-success', (event, data) => {
                 console.log(data);
             });
-            ipc.on('error', (event, error) => {
+            ipc.on('sys-error', (event, error) => {
                 console.log(error);
             })
         },
@@ -61,7 +66,7 @@ var app = new Vue({
                     let workspace = { title: dirs[0].replace(/.+\\/gi, ''), path: dirs[0] };
                     this.getWorkspaceStatus(workspace).then((res) => {
                         this.workspaces.push(res);
-                        ipc.send('save-config', { workspaces: this.workspacesForSave });
+                        this.setConfig();
                     });
                 }
             })
@@ -72,7 +77,7 @@ var app = new Vue({
                     workspace.path = dirs[0];
                     workspace.title = dirs[0].replace(/.+\\/gi, '');
                     this.getWorkspaceStatus(workspace).then((res) => {
-                        ipc.send('save-config', { workspaces: this.workspacesForSave });
+                        this.setConfig();
                     });
                 }
             })
@@ -86,7 +91,10 @@ var app = new Vue({
                 buttons: ['确定', '取消']
             };
             dialog.showMessageBox(options, (btnIndex, bb) => {
-                if (!btnIndex) this.workspaces.splice(index, 1);
+                if (!btnIndex) {
+                    this.workspaces.splice(index, 1);
+                    this.setConfig();
+                }
             })
         }
     },
