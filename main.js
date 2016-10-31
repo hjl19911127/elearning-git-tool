@@ -1,26 +1,24 @@
-const electron = require('electron')
+const electron = require('electron');
 const path = require('path');
 const fs = require('fs');
 
 // Module to control application life.
-const app = electron.app
+const app = electron.app;
 // Module to create native browser window.
-const BrowserWindow = electron.BrowserWindow
+const BrowserWindow = electron.BrowserWindow;
 
 const ipc = electron.ipcMain;
 // Keep a global reference of the window object, if you don't, the window will
 // be closed automatically when the JavaScript object is garbage collected.
-let mainWindow
+let mainWindow;
 
 function createWindow() {
-    bindEvents();
+    // add DevTools Extension
+    addDevToolsExtension(BrowserWindow);
     // Create the browser window.
     mainWindow = new BrowserWindow({ width: 1000, height: 600 })
     // and load the index.html of the app.
     mainWindow.loadURL(`file://${__dirname}/index.html`)
-    // add DevTools Extension
-    let vuePath = 'C:\\Users\\Alexander\\AppData\\Local\\Google\\Chrome\\User Data\\Default\\Extensions\\nhdogjmejiglipccpnnnanhbledajbpd\\2.1.2_1';
-    BrowserWindow.addDevToolsExtension(vuePath);
     // Open the DevTools.
     mainWindow.webContents.openDevTools()
     // Emitted when the window is closed.
@@ -41,7 +39,22 @@ function createWindow() {
             }
         });
     });
+    bindEvents();
+}
 
+function addDevToolsExtension(BrowserWindow) {
+    let extensionPath = process.env['LOCALAPPDATA'] + '\\Google\\Chrome\\User Data\\Default\\Extensions';
+    let vueDevtoolPath = extensionPath + '\\nhdogjmejiglipccpnnnanhbledajbpd'
+    fs.readdir(vueDevtoolPath, (err, files) => {
+        if (files[0]) {
+            let finalPath = vueDevtoolPath + '\\' + files[0];
+            fs.stat(finalPath, (err, stats) => {
+                if (stats.isDirectory()) {
+                    BrowserWindow.addDevToolsExtension(finalPath);
+                }
+            })
+        }
+    })
 }
 
 function bindEvents() {
