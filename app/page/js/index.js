@@ -3,24 +3,8 @@
 // All of the Node.js APIs are available in this process.
 const ipc = require('electron').ipcRenderer;
 const {dialog} = require('electron').remote;
-const simpleGit = require('simple-git'); 
-const globalTimer = {
-    timerID: 0,
-    counting: 0,
-    start(callback, intervalCount = 0) {
-        console.log(globalTimer.counting);
-        ++this.counting;
-        this.timerID = setTimeout(() => {
-            if (this.counting == intervalCount) {
-                callback(); this.counting = 0;
-            }
-            this.start(callback);
-        }, 1000)
-    },
-    stop() {
-        clearTimeout(this.timerID);
-    }
-}
+const simpleGit = require('simple-git');
+
 let app = new Vue({
     el: '#app',
     data() {
@@ -42,7 +26,7 @@ let app = new Vue({
         bindEvents() {
             ipc.on('get-config', (event, config) => {
                 this.initWorkspaces(config.workspaces || []);
-                globalTimer.start(this.refresh.bind(this), 5);
+                this.startRefreshing();
             });
             ipc.on('sys-success', (event, data) => {
                 console.log(data);
@@ -51,11 +35,15 @@ let app = new Vue({
                 console.log(error);
             })
         },
+        startRefreshing() {
+            this.initWorkspaces(this.workspaces);
+            setTimeout(this.startRefreshing.bind(this), 1000)
+        },
         setConfig() {
             ipc.send('set-config', { workspaces: this.workspacesForSave });
         },
-        refresh() {
-            console.log(globalTimer.counting);
+        refreshWorkspaces() {
+            console.log(1);
             this.initWorkspaces(this.workspaces);
         },
         initWorkspaces(workspaces) {
