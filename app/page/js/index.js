@@ -3,9 +3,25 @@
 // All of the Node.js APIs are available in this process.
 const ipc = require('electron').ipcRenderer;
 const {dialog} = require('electron').remote;
-const simpleGit = require('simple-git');
-
-var app = new Vue({
+const simpleGit = require('simple-git'); 
+const globalTimer = {
+    timerID: 0,
+    counting: 0,
+    start(callback, intervalCount = 0) {
+        console.log(globalTimer.counting);
+        ++this.counting;
+        this.timerID = setTimeout(() => {
+            if (this.counting == intervalCount) {
+                callback(); this.counting = 0;
+            }
+            this.start(callback);
+        }, 1000)
+    },
+    stop() {
+        clearTimeout(this.timerID);
+    }
+}
+let app = new Vue({
     el: '#app',
     data() {
         return {
@@ -23,15 +39,36 @@ var app = new Vue({
         init() {
             this.bindEvents();
         },
+        bindEvents() {
+            ipc.on('get-config', (event, config) => {
+                this.initWorkspaces(config.workspaces || []);
+                globalTimer.start(this.refresh.bind(this), 5);
+            });
+            ipc.on('sys-success', (event, data) => {
+                console.log(data);
+            });
+            ipc.on('sys-error', (event, error) => {
+                console.log(error);
+            })
+        },
         setConfig() {
             ipc.send('set-config', { workspaces: this.workspacesForSave });
         },
         refresh() {
-            ipc.send('get-config', { workspaces: this.workspacesForSave });
+            console.log(globalTimer.counting);
+            this.initWorkspaces(this.workspaces);
+        },
+        initWorkspaces(workspaces) {
+            let promises = workspaces.map((workspace) => {
+                return this.getWorkspaceStatus(workspace);
+            })
+            Promise.all(promises).then((res) => {
+                this.workspaces = res;
+            })
         },
         getWorkspaceStatus(item) {
             return new Promise((resolve, reject) => {
-                item.branchIntoDevelop = '';
+                item.branchIntoDevelop = item.branchIntoDevelop || '';
                 simpleGit(item.path).status((err, summary) => {
                     if (summary) item.nowBranch = summary.current;
                 }).branch((err, summary) => {
@@ -41,24 +78,6 @@ var app = new Vue({
                     resolve(item);
                 });
             });
-        },
-        bindEvents() {
-            ipc.on('get-config', (event, config) => {
-                if (config.workspaces) {
-                    let promises = config.workspaces.map((workspace) => {
-                        return this.getWorkspaceStatus(workspace);
-                    })
-                    Promise.all(promises).then((res) => {
-                        this.workspaces = res;
-                    })
-                }
-            });
-            ipc.on('sys-success', (event, data) => {
-                console.log(data);
-            });
-            ipc.on('sys-error', (event, error) => {
-                console.log(error);
-            })
         },
         addWorkspace() {
             dialog.showOpenDialog({ properties: ['openFile', 'openDirectory'] }, (dirs) => {
