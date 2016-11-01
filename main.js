@@ -15,10 +15,10 @@ const globalConfig = require('./app/native/globalConfig');
 let mainWindow;
 
 function createWindow() {
-    // add DevTools Extension
-    addDevToolsExtension(BrowserWindow);
     // Create the browser window.
     mainWindow = new BrowserWindow({ width: 1200, height: 800 })
+    // add DevTools Extension
+    addDevToolsExtension(BrowserWindow);
     // and load the index.html of the app.
     mainWindow.loadURL(`file://${__dirname}/index.html`)
     // Open the DevTools.

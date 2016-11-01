@@ -25,8 +25,8 @@ let app = new Vue({
         },
         bindEvents() {
             ipc.on('get-config', (event, config) => {
-                this.initWorkspaces(config.workspaces || []);
-                this.startRefreshing();
+                this.syncWorkspaces(config.workspaces || []);
+                setTimeout(this.startRefreshing.bind(this), 5000);
             });
             ipc.on('sys-success', (event, data) => {
                 console.log(data);
@@ -36,17 +36,16 @@ let app = new Vue({
             })
         },
         startRefreshing() {
-            this.initWorkspaces(this.workspaces);
-            setTimeout(this.startRefreshing.bind(this), 1000)
+            this.syncWorkspaces(this.workspaces);
+            setTimeout(this.startRefreshing.bind(this), 5000)
         },
         setConfig() {
             ipc.send('set-config', { workspaces: this.workspacesForSave });
         },
         refreshWorkspaces() {
-            console.log(1);
-            this.initWorkspaces(this.workspaces);
+            this.syncWorkspaces(this.workspaces);
         },
-        initWorkspaces(workspaces) {
+        syncWorkspaces(workspaces) {
             let promises = workspaces.map((workspace) => {
                 return this.getWorkspaceStatus(workspace);
             })
@@ -57,7 +56,8 @@ let app = new Vue({
         getWorkspaceStatus(item) {
             return new Promise((resolve, reject) => {
                 item.branchIntoDevelop = item.branchIntoDevelop || '';
-                simpleGit(item.path).status((err, summary) => {
+                simpleGit(item.path).fetch((err, summary) => {
+                }).status((err, summary) => {
                     if (summary) item.nowBranch = summary.current;
                 }).branch((err, summary) => {
                     item.AllBranches = Object.keys(summary.branches).map((key) => {
@@ -89,7 +89,7 @@ let app = new Vue({
                 }
             })
         },
-        deleteWorkspace(index, item) {
+        deleteWorkspace(item, index) {
             const options = {
                 type: 'question',
                 title: '删除工作目录',
@@ -103,6 +103,28 @@ let app = new Vue({
                     this.setConfig();
                 }
             })
+        },
+        executeGitTask(item) {
+            console.log(item);
+            //git checkout -b sf origin/serverfix
+            let nextBranchArr = item.branchIntoDevelop.split('/');
+            if (nextBranchArr[0] == 'remotes') {
+                nextBranchArr = nextBranchArr.slice(2);
+                simpleGit(item.path).branchLocal((err,summary)=>{
+                    console.log(summary);
+                })
+                simpleGit(item.path).checkoutBranch(nextBranchArr.join('/'), item.branchIntoDevelop, (err, summary) => {
+                    if (err) {
+                        // simpleGit(item.path).checkoutBranch(nextBranchArr.join('/'), item.branchIntoDevelop, (err, summary) => {
+                        //     if (err) {
+
+                        //     }
+                        //     console.log(summary);
+                        // });
+                    }
+                });
+            }
+
         }
     },
     created() {

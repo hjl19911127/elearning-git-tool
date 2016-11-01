@@ -22,13 +22,13 @@ const globalConfig = {
     setConfig(config) {
         return new Promise((resolve, reject) => {
             var path = this.configPath;
+            config = JSON.stringify(config, null, 4);
             fs.exists(path, (exist) => {
                 if (exist) {
                     fs.readFile(path, 'utf8', (err, data) => {
                         if (err) {
                             reject(err);
                         } else {
-                            config = JSON.stringify(config, null, 4)
                             fs.writeFile(path, config, function (err) {
                                 if (!err) {
                                     resolve('Modify Config success!');
@@ -39,7 +39,6 @@ const globalConfig = {
                         }
                     });
                 } else {
-                    config = JSON.stringify(config, null, 4)
                     fs.writeFile(path, config, function (err) {
                         if (!err) {
                             resolve('Add Config success!');

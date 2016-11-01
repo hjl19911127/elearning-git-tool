@@ -48,8 +48,8 @@
 							<td><input type="text" class="form-control col-xs-12" placeholder="输入新分支" v-model.lazy.trim="item.newBranch"></td>
 							<td>
 								<button type="button" class="btn btn-primary btn-xs" @click="selectWorkspace(item)" title="更换目录"><span class="glyphicon glyphicon-cog"></span></button>
-								<button type="button" class="btn btn-success btn-xs" @click="deleteWorkspace(index,item)" title="执行"><span class="glyphicon glyphicon-play"></span></button>
-								<button type="button" class="btn btn-danger btn-xs" @click="deleteWorkspace(index,item)" title="删除"><span class="glyphicon glyphicon-minus"></span></button>
+								<button type="button" class="btn btn-success btn-xs" @click="executeGitTask(item)" title="执行"><span class="glyphicon glyphicon-play"></span></button>
+								<button type="button" class="btn btn-danger btn-xs" @click="deleteWorkspace(item,index)" title="删除"><span class="glyphicon glyphicon-minus"></span></button>
 							</td>
 						</tr>
 					</tbody>
