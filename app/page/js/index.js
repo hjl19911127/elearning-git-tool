@@ -26,7 +26,7 @@ let app = new Vue({
         bindEvents() {
             ipc.on('get-config', (event, config) => {
                 this.syncWorkspaces(config.workspaces || []);
-                setTimeout(this.startRefreshing.bind(this), 5000);
+                setTimeout(this.refreshWorkspaces.bind(this), 5000);
             });
             ipc.on('sys-success', (event, data) => {
                 console.log(data);
@@ -35,15 +35,12 @@ let app = new Vue({
                 console.log(error);
             })
         },
-        startRefreshing() {
-            this.syncWorkspaces(this.workspaces);
-            setTimeout(this.startRefreshing.bind(this), 5000)
-        },
         setConfig() {
             ipc.send('set-config', { workspaces: this.workspacesForSave });
         },
         refreshWorkspaces() {
             this.syncWorkspaces(this.workspaces);
+            setTimeout(this.refreshWorkspaces.bind(this), 5000)
         },
         syncWorkspaces(workspaces) {
             let promises = workspaces.map((workspace) => {
@@ -108,21 +105,29 @@ let app = new Vue({
             console.log(item);
             //git checkout -b sf origin/serverfix
             let nextBranchArr = item.branchIntoDevelop.split('/');
-            if (nextBranchArr[0] == 'remotes') {
+            simpleGit(item.path).branch(['-vv'], (err, summary) => {
+                console.log('branch');
+                console.log(summary);
+            })
+            simpleGit(item.path).mergeFromTo(item.branchIntoDevelop, 'remotes/origin/develop', (err, summary) => {
+                console.log('mergeFromTo');
+                console.log(summary);
+            })
+            if (item.newBranch) {
                 nextBranchArr = nextBranchArr.slice(2);
-                simpleGit(item.path).branchLocal((err,summary)=>{
+                simpleGit(item.path).mergeFromTo(item.branchIntoDevelop, 'remotes/origin/develop', (err, summary) => {
+                    console.log('mergeFromTo');
                     console.log(summary);
-                })
-                simpleGit(item.path).checkoutBranch(nextBranchArr.join('/'), item.branchIntoDevelop, (err, summary) => {
-                    if (err) {
-                        // simpleGit(item.path).checkoutBranch(nextBranchArr.join('/'), item.branchIntoDevelop, (err, summary) => {
-                        //     if (err) {
-
-                        //     }
-                        //     console.log(summary);
-                        // });
-                    }
-                });
+                }).checkout('develop', (err, summary) => {
+                    console.log('checkout');
+                    console.log(summary);
+                }).pull((err, summary) => {
+                    console.log('pull');
+                    console.log(summary);
+                }).checkoutLocalBranch(item.newBranch, (err, summary) => {
+                    console.log('checkoutLocalBranch');
+                    console.log(summary);
+                }).push();
             }
 
         }
