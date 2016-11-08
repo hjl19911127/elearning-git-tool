@@ -130,6 +130,13 @@ let app = new Vue({
                 }).push();
             }
 
+        },
+        showLogModal(item) {
+            var list = [];
+            simpleGit(item.path).log(['--name-status','--since="2016-11-07"'], (err, summary) => {
+                console.log(summary);
+                list = summary.all;
+            })
         }
     },
     created() {

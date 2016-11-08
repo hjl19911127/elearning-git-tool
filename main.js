@@ -16,7 +16,7 @@ let mainWindow;
 
 function createWindow() {
     // Create the browser window.
-    mainWindow = new BrowserWindow({ width: 1200, height: 800 })
+    mainWindow = new BrowserWindow({ width: 1400, height: 800 })
     // add DevTools Extension
     addDevToolsExtension(BrowserWindow);
     // and load the index.html of the app.

@@ -46,6 +46,7 @@
 							</td>
 							<td><input type="text" class="form-control col-xs-12" placeholder="输入新分支" v-model.lazy.trim="item.newBranch"></td>
 							<td>
+								<button type="button" class="btn btn-info btn-xs" @click="showLogModal(item)" title="获取日志"><span class="glyphicon glyphicon-search"></span></button>
 								<button type="button" class="btn btn-primary btn-xs" @click="selectWorkspace(item)" title="更换目录"><span class="glyphicon glyphicon-cog"></span></button>
 								<button type="button" class="btn btn-success btn-xs" @click="executeGitTask(item)" title="执行"><span class="glyphicon glyphicon-play"></span></button>
 								<button type="button" class="btn btn-danger btn-xs" @click="deleteWorkspace(item,index)" title="删除"><span class="glyphicon glyphicon-minus"></span></button>
@@ -55,7 +56,24 @@
 				</table>
 				<div class="text-center" v-if="!workspaces.length">无</div>
 			</div>
-
+		</div>
+		<div id="" class="modal fade" tabindex="-1">
+			<div class="modal-dialog">
+				<div class="modal-content">
+					<div class="modal-header">
+						<button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+						<h4 class="modal-title">Modal title</h4>
+					</div>
+					<div class="modal-body">
+						<p>One fine body&hellip;</p>
+					</div>
+					<div class="modal-footer">
+						<button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+						<button type="button" class="btn btn-primary">Save changes</button>
+					</div>
+				</div>
+				<!-- /.modal-content -->
+			</div>
 		</div>
 	</div>
 </body>
