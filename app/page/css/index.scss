@@ -1,3 +1,8 @@
+.file-list{
+  max-height: 400px;
+  overflow-y: auto;
+}
+
 /*滚动条*/
 ::-webkit-scrollbar {
   height: 8px;

@@ -10,6 +10,12 @@ let app = new Vue({
     data() {
         return {
             workspaces: [],
+            targetItem: null,
+            fileHistory: {
+                after: '',
+                author: [],
+                items: [],
+            }
         }
     },
     computed: {
@@ -22,6 +28,8 @@ let app = new Vue({
     methods: {
         init() {
             this.bindEvents();
+            $('#fileHistory').datepicker({
+            });
         },
         bindEvents() {
             ipc.on('get-config', (event, config) => {
@@ -102,6 +110,7 @@ let app = new Vue({
             })
         },
         executeGitTask(item) {
+            return;
             console.log(item);
             //git checkout -b sf origin/serverfix
             let nextBranchArr = item.branchIntoDevelop.split('/');
@@ -129,14 +138,34 @@ let app = new Vue({
                     console.log(summary);
                 }).push();
             }
-
+        },
+        getFileHistory() {
+            var item = this.targetItem, fileList = [], after = this.fileHistory.after;
+            var options = {
+                'format': { 'res': '' },
+                '--name-only': null,
+                '--after': after,
+                '--author': 'lint\\|huangjl\\|ganqz\\|llj\\|lixy\\|林涛'
+            };
+            simpleGit(item.path).log(options, (err, summary) => {
+                console.log(summary);
+                fileList = summary.all.map((item) => {
+                    return item.res;
+                });
+                this.fileHistory.items = [...(new Set(fileList))].sort();
+            })
         },
         showLogModal(item) {
-            var list = [];
-            simpleGit(item.path).log(['--name-status','--since="2016-11-07"'], (err, summary) => {
-                console.log(summary);
-                list = summary.all;
-            })
+            this.targetItem = item;
+            this.fileHistory.after = '';
+            $('#fileViewer').modal('show');
+            $('#fileHistory').datepicker({
+                format: "yyyy-mm-dd",
+                language: "zh-CN",
+                autoclose: true
+            }).off('change').on('change', (event) => {
+                this.fileHistory.after = event.target.value;
+            });
         }
     },
     created() {

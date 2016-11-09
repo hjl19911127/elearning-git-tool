@@ -48,6 +48,7 @@ function addDevToolsExtension(BrowserWindow) {
             let finalPath = vueDevtoolPath + '\\' + files[0];
             fs.stat(finalPath, (err, stats) => {
                 if (stats.isDirectory()) {
+                    // BrowserWindow.removeDevToolsExtension('Vue.js devtools');
                     BrowserWindow.addDevToolsExtension(finalPath);
                 }
             })
