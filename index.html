@@ -72,8 +72,10 @@
 									<div class="panel-heading">设置</div>
 									<div class="panel-body">
 										<div class="form-group">
-											<label for="fileHistory">起始时间</label>
-											<input type="text" class="form-control" id="fileHistory" placeholder="起始时间" v-model.lazy="fileHistory.after">
+											<label for="fileHistory_after">起始时间</label>
+											<input type="text" class="form-control" id="fileHistory_after" placeholder="起始时间" v-model.lazy="fileHistory.after">
+											<label for="fileHistory_level">目录层级</label>
+											<input type="text" class="form-control" id="fileHistory_level" placeholder="目录层级" v-model.lazy="fileHistory.level">
 										</div>
 										<button type="button" class="btn btn-success btn-md" @click="getFileHistory" title="执行"><span class="glyphicon glyphicon-play"></span> 执行</button>
 									</div>

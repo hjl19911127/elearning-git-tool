@@ -12,6 +12,7 @@ let app = new Vue({
             workspaces: [],
             targetItem: null,
             fileHistory: {
+                level: '3',
                 after: '',
                 author: [],
                 items: [],
@@ -48,7 +49,7 @@ let app = new Vue({
         },
         refreshWorkspaces() {
             this.syncWorkspaces(this.workspaces);
-            setTimeout(this.refreshWorkspaces.bind(this), 5000)
+            // setTimeout(this.refreshWorkspaces.bind(this), 5000)
         },
         syncWorkspaces(workspaces) {
             let promises = workspaces.map((workspace) => {
@@ -140,7 +141,7 @@ let app = new Vue({
             }
         },
         getFileHistory() {
-            var item = this.targetItem, fileList = [], after = this.fileHistory.after;
+            var item = this.targetItem, fileList = [], after = this.fileHistory.after, level = this.fileHistory.level;
             var options = {
                 'format': { 'res': '' },
                 '--name-only': null,
@@ -148,21 +149,25 @@ let app = new Vue({
                 '--author': 'lint\\|huangjl\\|ganqz\\|llj\\|lixy\\|林涛'
             };
             simpleGit(item.path).log(options, (err, summary) => {
-                console.log(summary);
                 fileList = summary.all.map((item) => {
-                    return item.res;
+                    var fileArr = item.res.split('\/');
+                    --fileArr.length;
+                    fileArr.length = fileArr.length > level ? level : fileArr.length;
+                    return fileArr.join('\/');
                 });
                 this.fileHistory.items = [...(new Set(fileList))].sort();
             })
         },
         showLogModal(item) {
             this.targetItem = item;
+            this.fileHistory.level = '3';
             this.fileHistory.after = '';
             $('#fileViewer').modal('show');
-            $('#fileHistory').datepicker({
+            $('#fileHistory_after').datepicker({
                 format: "yyyy-mm-dd",
                 language: "zh-CN",
-                autoclose: true
+                autoclose: true,
+                todayHighlight: true
             }).off('change').on('change', (event) => {
                 this.fileHistory.after = event.target.value;
             });
