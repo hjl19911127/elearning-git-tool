@@ -12,11 +12,8 @@ let app = new Vue({
             workspaces: [],
             targetItem: null,
             gitExecuting: false,
-            fileHistory: {
+            fileLog: {
                 allAuthors: [],
-                level: '3',
-                after: '',
-                selectedAuthors: [],
                 items: [],
             }
         }
@@ -24,7 +21,7 @@ let app = new Vue({
     computed: {
         workspacesForSave() {
             return this.workspaces.map((item) => {
-                return { title: item.title, path: item.path };
+                return { title: item.title, path: item.path, fileLog: item.fileLog };
             });
         }
     },
@@ -113,7 +110,6 @@ let app = new Vue({
         executeGitTask(item) {
             return;
             console.log(item);
-            //git checkout -b sf origin/serverfix
             let nextBranchArr = item.branchIntoDevelop.split('/');
             simpleGit(item.path).branch(['-vv'], (err, summary) => {
                 console.log('branch');
@@ -140,8 +136,10 @@ let app = new Vue({
                 }).push();
             }
         },
-        getFileHistory() {
-            let item = this.targetItem, {after, level, selectedAuthors, items} = this.fileHistory;
+        getFileLog() {
+            let item = this.targetItem, {after, level, selectedAuthors, items} = item.fileLog;
+            item.fileLog = { selectedAuthors: selectedAuthors, level: level, after: after };
+            this.setConfig();
             if (after) {
                 let options = {
                     'format': { 'res': '' },
@@ -151,6 +149,7 @@ let app = new Vue({
                 selectedAuthors.length && (options['--author'] = selectedAuthors.join('\\|'));
                 console.log(options);
                 this.gitExecuting = true;
+                this.fileLog.items = [];
                 simpleGit(item.path).pull().log(options, (err, summary) => {
                     let fileList = summary.all.map((item) => {
                         let fileArr = item.res.split('\/');
@@ -158,30 +157,31 @@ let app = new Vue({
                         fileArr.length = fileArr.length > level ? level : fileArr.length;
                         return fileArr.join('\/');
                     });
-                    this.fileHistory.items = [...(new Set(fileList))].sort();
+                    this.fileLog.items = [...(new Set(fileList))].sort();
                     this.gitExecuting = false;
                 })
             }
         },
         showLogModal(item) {
             this.targetItem = item;
-            this.fileHistory.level = '3';
-            this.fileHistory.after = '';
+            this.fileLog.level = item.fileLog.level;
+            this.fileLog.after = item.fileLog.after;
+            this.fileLog.selectedAuthors = item.fileLog.selectedAuthors;
             $('#fileViewer').modal('show');
-            $('#fileHistory_after').datepicker({
+            $('#fileLog_after').datepicker({
                 format: "yyyy-mm-dd",
                 language: "zh-CN",
                 autoclose: true,
                 todayHighlight: true
             }).off('change').on('change', (event) => {
-                this.fileHistory.after = event.target.value;
+                this.fileLog.after = event.target.value;
             });
             simpleGit(item.path).pull().log({ 'format': { 'author': '%aN' } }, (err, summary) => {
                 let authorMap = new Map();
                 summary.all.forEach((item) => {
-                    authorMap.get(item.author) ? ++authorMap.get(item.author).count : authorMap.set(item.author, { "name": item.author, "count": 0 });
+                    authorMap.get(item.author) ? ++authorMap.get(item.author).count : authorMap.set(item.author, { "name": item.author, "count": 1 });
                 });
-                this.fileHistory.allAuthors = [...authorMap.values()].sort((a, b) => {
+                this.fileLog.allAuthors = [...authorMap.values()].sort((a, b) => {
                     return b.count - a.count;
                 });
             })
