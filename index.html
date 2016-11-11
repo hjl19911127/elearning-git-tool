@@ -70,14 +70,35 @@
 							<div class="col-xs-6">
 								<div class="panel panel-default">
 									<div class="panel-heading">设置</div>
-									<div class="panel-body">
+									<div class="panel-body form-horizontal">
 										<div class="form-group">
-											<label for="fileHistory_after">起始时间</label>
-											<input type="text" class="form-control" id="fileHistory_after" placeholder="起始时间" v-model.lazy="fileHistory.after">
-											<label for="fileHistory_level">目录层级</label>
-											<input type="text" class="form-control" id="fileHistory_level" placeholder="目录层级" v-model.lazy="fileHistory.level">
+											<label for="fileHistory_after" class="control-label col-xs-3">起始时间</label>
+											<div class="col-xs-9">
+												<input type="text" class="form-control" id="fileHistory_after" placeholder="起始时间" v-model.lazy="fileHistory.after">
+											</div>
 										</div>
-										<button type="button" class="btn btn-success btn-md" @click="getFileHistory" title="执行"><span class="glyphicon glyphicon-play"></span> 执行</button>
+										<div class="form-group">
+											<label for="fileHistory_level" class="control-label col-xs-3">目录层级</label>
+											<div class="col-xs-9">
+												<input type="text" class="form-control" id="fileHistory_level" placeholder="目录层级" v-model.lazy="fileHistory.level">
+											</div>
+										</div>
+										<div class="form-group">
+											<label for="fileHistory_level" class="control-label col-xs-3">提交作者</label>
+											<div class="col-xs-9">
+												<div class="checkbox" v-if="!fileHistory.allAuthors.length">获取中...</div>
+												<div class="checkbox col-xs-6" v-for="author in fileHistory.allAuthors">
+													<label>
+          												<input type="checkbox" :value="author.name" v-model="fileHistory.selectedAuthors">{{author.name}} <span class="badge">{{author.count}}</span>
+        											</label>
+												</div>
+											</div>
+										</div>
+										<div class="form-group">
+											<div class="col-xs-offset-3 col-xs-9">
+												<button type="button" class="btn btn-success btn-md" @click="getFileHistory" title="执行"><span class="glyphicon glyphicon-play"></span> 执行</button>
+											</div>
+										</div>
 									</div>
 								</div>
 							</div>
@@ -85,6 +106,7 @@
 								<div class="panel panel-default">
 									<div class="panel-heading">结果</div>
 									<div class="panel-body">
+										<div v-if="gitExecuting">获取中...</div>
 										<ul class="list-unstyled file-list" contenteditable="true">
 											<li v-for="item in fileHistory.items">{{item}}</li>
 										</ul>
@@ -94,8 +116,7 @@
 						</div>
 					</div>
 					<div class="modal-footer">
-						<button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-						<button type="button" class="btn btn-primary">Save changes</button>
+						<button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
 					</div>
 				</div>
 				<!-- /.modal-content -->

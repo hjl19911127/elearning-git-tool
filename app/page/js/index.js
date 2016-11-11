@@ -11,10 +11,12 @@ let app = new Vue({
         return {
             workspaces: [],
             targetItem: null,
+            gitExecuting: false,
             fileHistory: {
+                allAuthors: [],
                 level: '3',
                 after: '',
-                author: [],
+                selectedAuthors: [],
                 items: [],
             }
         }
@@ -29,8 +31,6 @@ let app = new Vue({
     methods: {
         init() {
             this.bindEvents();
-            $('#fileHistory').datepicker({
-            });
         },
         bindEvents() {
             ipc.on('get-config', (event, config) => {
@@ -141,22 +141,27 @@ let app = new Vue({
             }
         },
         getFileHistory() {
-            var item = this.targetItem, fileList = [], after = this.fileHistory.after, level = this.fileHistory.level;
-            var options = {
-                'format': { 'res': '' },
-                '--name-only': null,
-                '--after': after,
-                '--author': 'lint\\|huangjl\\|ganqz\\|llj\\|lixy\\|林涛'
-            };
-            simpleGit(item.path).log(options, (err, summary) => {
-                fileList = summary.all.map((item) => {
-                    var fileArr = item.res.split('\/');
-                    --fileArr.length;
-                    fileArr.length = fileArr.length > level ? level : fileArr.length;
-                    return fileArr.join('\/');
-                });
-                this.fileHistory.items = [...(new Set(fileList))].sort();
-            })
+            let item = this.targetItem, {after, level, selectedAuthors, items} = this.fileHistory;
+            if (after) {
+                let options = {
+                    'format': { 'res': '' },
+                    '--name-only': null,
+                    '--after': after
+                };
+                selectedAuthors.length && (options['--author'] = selectedAuthors.join('\\|'));
+                console.log(options);
+                this.gitExecuting = true;
+                simpleGit(item.path).pull().log(options, (err, summary) => {
+                    let fileList = summary.all.map((item) => {
+                        let fileArr = item.res.split('\/');
+                        --fileArr.length;
+                        fileArr.length = fileArr.length > level ? level : fileArr.length;
+                        return fileArr.join('\/');
+                    });
+                    this.fileHistory.items = [...(new Set(fileList))].sort();
+                    this.gitExecuting = false;
+                })
+            }
         },
         showLogModal(item) {
             this.targetItem = item;
@@ -171,6 +176,15 @@ let app = new Vue({
             }).off('change').on('change', (event) => {
                 this.fileHistory.after = event.target.value;
             });
+            simpleGit(item.path).pull().log({ 'format': { 'author': '%aN' } }, (err, summary) => {
+                let authorMap = new Map();
+                summary.all.forEach((item) => {
+                    authorMap.get(item.author) ? ++authorMap.get(item.author).count : authorMap.set(item.author, { "name": item.author, "count": 0 });
+                });
+                this.fileHistory.allAuthors = [...authorMap.values()].sort((a, b) => {
+                    return b.count - a.count;
+                });
+            })
         }
     },
     created() {
