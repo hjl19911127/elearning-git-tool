@@ -140,7 +140,7 @@ let app = new Vue({
             let item = this.targetItem, {after, level, selectedAuthors, items} = item.fileLog;
             item.fileLog = { selectedAuthors: selectedAuthors, level: level, after: after };
             this.setConfig();
-            if (after) {
+            if (after && level > 1) {
                 let options = {
                     'format': { 'res': '' },
                     '--name-only': null,
@@ -164,9 +164,6 @@ let app = new Vue({
         },
         showLogModal(item) {
             this.targetItem = item;
-            this.fileLog.level = item.fileLog.level;
-            this.fileLog.after = item.fileLog.after;
-            this.fileLog.selectedAuthors = item.fileLog.selectedAuthors;
             $('#fileViewer').modal('show');
             $('#fileLog_after').datepicker({
                 format: "yyyy-mm-dd",
