@@ -139,8 +139,8 @@ let app = new Vue({
         getFileLog() {
             let item = this.targetItem, {after, level, selectedAuthors, items} = item.fileLog;
             item.fileLog = { selectedAuthors: selectedAuthors, level: level, after: after };
-            this.setConfig();
             if (after && level > 1) {
+                this.setConfig();
                 let options = {
                     'format': { 'res': '' },
                     '--name-only': null,
