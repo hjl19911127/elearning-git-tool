@@ -164,23 +164,26 @@ const app = new Vue({
         },
         showLogModal(item) {
             this.targetItem = item;
-            $('#fileViewer').modal('show');
-            $('#fileLog_after').datepicker({
-                format: "yyyy-mm-dd",
-                language: "zh-CN",
-                autoclose: true,
-                todayHighlight: true
-            }).off('change').on('change', (event) => {
-                this.fileLog.after = event.target.value;
-            });
-            simpleGit(item.path).pull().log({ 'format': { 'author': '%aN' } }, (err, summary) => {
-                let authorMap = new Map();
-                summary.all.forEach((item) => {
-                    authorMap.get(item.author) ? ++authorMap.get(item.author).count : authorMap.set(item.author, { "name": item.author, "count": 1 });
+            this.$nextTick(() => {
+                // DOM updated
+                $('#fileViewer').modal('show');
+                $('#fileLog_after').datepicker({
+                    format: "yyyy-mm-dd",
+                    language: "zh-CN",
+                    autoclose: true,
+                    todayHighlight: true
+                }).off('change').on('change', (event) => {
+                    this.fileLog.after = event.target.value;
                 });
-                this.fileLog.allAuthors = [...authorMap.values()].sort((a, b) => {
-                    return b.count - a.count;
-                });
+                simpleGit(item.path).pull().log({ 'format': { 'author': '%aN' } }, (err, summary) => {
+                    let authorMap = new Map();
+                    summary.all.forEach((item) => {
+                        authorMap.get(item.author) ? ++authorMap.get(item.author).count : authorMap.set(item.author, { "name": item.author, "count": 1 });
+                    });
+                    this.fileLog.allAuthors = [...authorMap.values()].sort((a, b) => {
+                        return b.count - a.count;
+                    });
+                })
             })
         }
     },
