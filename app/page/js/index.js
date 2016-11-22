@@ -5,8 +5,7 @@ const ipc = require('electron').ipcRenderer;
 const {dialog} = require('electron').remote;
 const simpleGit = require('simple-git');
 
-let app = new Vue({
-    el: '#app',
+const app = new Vue({
     data() {
         return {
             workspaces: [],
@@ -59,6 +58,7 @@ let app = new Vue({
         getWorkspaceStatus(item) {
             return new Promise((resolve, reject) => {
                 item.branchIntoDevelop = item.branchIntoDevelop || '';
+                item.fileLog = item.fileLog || { 'after': '', 'level': '4', 'selectedAuthors': [] }
                 simpleGit(item.path).fetch((err, summary) => {
                 }).status((err, summary) => {
                     if (summary) item.nowBranch = summary.current;
@@ -153,9 +153,9 @@ let app = new Vue({
                 simpleGit(item.path).pull().log(options, (err, summary) => {
                     let fileList = summary.all.map((item) => {
                         let fileArr = item.res.split('\/');
-                        --fileArr.length;
+                        // --fileArr.length;
                         fileArr.length = fileArr.length > level ? level : fileArr.length;
-                        return fileArr.join('\/');
+                        return '\/' + fileArr.join('\/');
                     });
                     this.fileLog.items = [...(new Set(fileList))].sort();
                     this.gitExecuting = false;
@@ -187,4 +187,4 @@ let app = new Vue({
     created() {
         this.init()
     }
-})
+}).$mount('#app');
