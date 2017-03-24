@@ -17,10 +17,11 @@
   "author": "hjl4347570@163.com",
   "license": "MIT",
   "dependencies": {
-    "simple-git": "^1.62.0"
+    "simple-git": "^1.67.0",
+    "vue": "^2.2.5"
   },
   "devDependencies": {
-    "electron": "^1.4.5",
-    "electron-packager": "^8.2.0"
+    "electron": "^1.6.2",
+    "electron-packager": "^8.6.0"
   }
 }
